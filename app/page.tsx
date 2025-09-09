@@ -5,6 +5,7 @@ import { Search, MessageCircle, ShoppingCart, Menu, X, Sparkles } from 'lucide-r
 import SearchResults from '@/components/SearchResults'
 import ChatInterface from '@/components/ChatInterface'
 import ProductCard from '@/components/ProductCard'
+import { getApiUrl } from '@/lib/config'
 
 interface SearchResult {
   id: string
@@ -33,7 +34,7 @@ export default function Home() {
     setIsSearching(true)
     setChatResponse(null)
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&includeChat=true`)
+      const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
       const data = await response.json()
       setSearchResults(data.results || [])
       setChatResponse(data.chatResponse)
@@ -49,7 +50,7 @@ export default function Home() {
     
     if (value.length > 2) {
       try {
-        const response = await fetch(`/api/search?q=${encodeURIComponent(value)}&type=suggestions`)
+        const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(value)}&type=suggestions`)
         const data = await response.json()
         setSuggestions(data.suggestions || [])
       } catch (error) {

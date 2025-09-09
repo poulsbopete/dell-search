@@ -1,0 +1,28 @@
+{
+  "name": "dell-search-aws-deployment",
+  "version": "1.0.0",
+  "description": "AWS deployment configuration for Dell Search Demo",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy": "cdk deploy",
+    "destroy": "cdk destroy",
+    "synth": "cdk synth"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.100.0",
+    "constructs": "^10.0.0",
+    "@aws-cdk/aws-lambda-nodejs": "^2.100.0",
+    "@aws-cdk/aws-apigateway": "^2.100.0",
+    "@aws-cdk/aws-cloudfront": "^2.100.0",
+    "@aws-cdk/aws-s3": "^2.100.0",
+    "@aws-cdk/aws-s3-deployment": "^2.100.0",
+    "@aws-cdk/aws-iam": "^2.100.0"
+  }
+}

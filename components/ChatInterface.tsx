@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Send, X, Bot, User } from 'lucide-react'
+import { getApiUrl } from '@/lib/config'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -47,7 +48,7 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(getApiUrl('/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

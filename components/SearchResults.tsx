@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { SearchResult } from '@/lib/elastic'
 import ProductCard from './ProductCard'
+import { getApiUrl } from '@/lib/config'
 
 interface SearchResultsProps {
   results: SearchResult[]
@@ -104,7 +105,7 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
   const handleFollowUpQuery = async (query: string) => {
     setIsChatLoading(true)
     try {
-      const response = await fetch(`/api/search?q=${encodeURIComponent(query)}&includeChat=true`)
+              const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
       const data = await response.json()
       setCurrentChatResponse(data.chatResponse)
     } catch (error) {
