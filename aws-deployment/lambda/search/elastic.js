@@ -76,7 +76,7 @@ async function searchProducts(query, size = 20) {
       JSON.stringify(searchBody)
     );
 
-    return response.hits.hits.map(hit => ({
+    const results = response.hits.hits.map(hit => ({
       id: hit._id,
       title: hit._source.title || 'No title',
       description: hit._source.description || 'No description',
@@ -86,6 +86,41 @@ async function searchProducts(query, size = 20) {
       url: hit._source.url,
       _score: hit._score
     }));
+
+    // Enhance results with real images
+    const enhancedResults = results.map(result => {
+      if (!result.image) {
+        // Generate image URL based on product type
+        const title = result.title.toLowerCase();
+        const category = result.category?.toLowerCase() || '';
+        
+        let imageUrl = 'https://images.unsplash.com/photo-1593640408182-d31b5e8b2bdc?w=400&h=300&fit=crop&crop=center'; // default
+        
+        if (title.includes('laptop') || title.includes('notebook') || title.includes('inspiron') || title.includes('xps') || title.includes('latitude')) {
+          imageUrl = 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('desktop') || title.includes('optiplex') || title.includes('vostro')) {
+          imageUrl = 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('monitor') || title.includes('display') || title.includes('ultrasharp')) {
+          imageUrl = 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('server') || title.includes('poweredge') || title.includes('rack')) {
+          imageUrl = 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('workstation') || title.includes('precision')) {
+          imageUrl = 'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('gaming') || title.includes('alienware')) {
+          imageUrl = 'https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=300&fit=crop&crop=center';
+        } else if (title.includes('business') || title.includes('enterprise')) {
+          imageUrl = 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center';
+        }
+        
+        return {
+          ...result,
+          image: imageUrl
+        };
+      }
+      return result;
+    });
+
+    return enhancedResults;
   } catch (error) {
     console.error('Elasticsearch search error:', error);
     return [];

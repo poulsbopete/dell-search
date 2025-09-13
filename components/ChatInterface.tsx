@@ -48,7 +48,7 @@ export default function ChatInterface({ onClose }: ChatInterfaceProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(getApiUrl('/chat'), {
+      const response = await fetch(getApiUrl('/api/chat'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

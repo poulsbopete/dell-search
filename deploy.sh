@@ -18,13 +18,11 @@ if ! command -v cdk &> /dev/null; then
 fi
 
 # Check if environment variables are set
-if [ -z "$ELASTICSEARCH_URL" ] || [ -z "$ELASTICSEARCH_API_KEY" ] || [ -z "$ELASTIC_1CHAT_URL" ] || [ -z "$ELASTIC_1CHAT_API_KEY" ]; then
+if [ -z "$ELASTICSEARCH_URL" ] || [ -z "$ELASTICSEARCH_API_KEY" ] || [ -z "$OPENAI_API_KEY" ]; then
     echo "❌ Required environment variables are not set:"
     echo "   - ELASTICSEARCH_URL"
     echo "   - ELASTICSEARCH_API_KEY"
-    echo "   - ELASTIC_1CHAT_URL"
-    echo "   - ELASTIC_1CHAT_API_KEY"
-    echo "   - OPENAI_API_KEY (optional)"
+    echo "   - OPENAI_API_KEY"
     exit 1
 fi
 

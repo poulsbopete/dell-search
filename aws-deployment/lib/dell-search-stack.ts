@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as cloudfront from 'aws-cdk-lib/aws-cloudfront';
+import * as origins from 'aws-cdk-lib/aws-cloudfront-origins';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -25,7 +26,7 @@ export class DellSearchStack extends cdk.Stack {
     // CloudFront distribution
     const distribution = new cloudfront.Distribution(this, 'DellSearchDistribution', {
       defaultBehavior: {
-        origin: new cloudfront.origins.S3Origin(websiteBucket),
+        origin: new origins.S3Origin(websiteBucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
       },
@@ -53,8 +54,6 @@ export class DellSearchStack extends cdk.Stack {
         ELASTICSEARCH_URL: process.env.ELASTICSEARCH_URL || '',
         ELASTICSEARCH_API_KEY: process.env.ELASTICSEARCH_API_KEY || '',
         ELASTICSEARCH_INDEX: process.env.ELASTICSEARCH_INDEX || 'search-dell',
-        ELASTIC_1CHAT_URL: process.env.ELASTIC_1CHAT_URL || '',
-        ELASTIC_1CHAT_API_KEY: process.env.ELASTIC_1CHAT_API_KEY || '',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
       },
       timeout: cdk.Duration.seconds(30),
@@ -67,8 +66,6 @@ export class DellSearchStack extends cdk.Stack {
       handler: 'index.handler',
       code: lambda.Code.fromAsset(path.join(__dirname, '../lambda/chat')),
       environment: {
-        ELASTIC_1CHAT_URL: process.env.ELASTIC_1CHAT_URL || '',
-        ELASTIC_1CHAT_API_KEY: process.env.ELASTIC_1CHAT_API_KEY || '',
         OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
       },
       timeout: cdk.Duration.seconds(30),

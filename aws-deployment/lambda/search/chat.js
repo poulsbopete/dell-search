@@ -1,32 +1,46 @@
 const https = require('https');
-const http = require('http');
 
 async function sendChatMessage(message, history = []) {
   try {
-    const url = new URL(`${process.env.ELASTIC_1CHAT_URL}/api/chat/converse`);
-    
+    // Convert history to OpenAI format
+    const openaiHistory = history.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    const requestBody = {
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful Dell product assistant. Help users find the right Dell products including laptops, desktops, monitors, and accessories. Provide helpful recommendations and answer questions about Dell products. Keep responses concise and helpful."
+        },
+        ...openaiHistory,
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
+    };
+
     const options = {
-      hostname: url.hostname,
-      port: url.port || (url.protocol === 'https:' ? 443 : 80),
-      path: url.pathname + url.search,
+      hostname: 'api.openai.com',
+      port: 443,
+      path: '/v1/chat/completions',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `ApiKey ${process.env.ELASTIC_1CHAT_API_KEY}`,
-        'kbn-xsrf': 'true'
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
       },
     };
 
-    const body = JSON.stringify({
-      input: message
-    });
-
+    const body = JSON.stringify(requestBody);
     options.headers['Content-Length'] = Buffer.byteLength(body);
 
     return new Promise((resolve, reject) => {
-      const client = url.protocol === 'https:' ? https : http;
-      
-      const req = client.request(options, (res) => {
+      const req = https.request(options, (res) => {
         let data = '';
         
         res.on('data', (chunk) => {
@@ -37,7 +51,7 @@ async function sendChatMessage(message, history = []) {
           try {
             if (res.statusCode >= 200 && res.statusCode < 300) {
               const parsedData = JSON.parse(data);
-              const responseMessage = parsedData.response?.message || parsedData.message || 'I found some information for you.';
+              const responseMessage = parsedData.choices?.[0]?.message?.content || 'I found some information for you.';
               const suggestions = generateSuggestionsFromResponse(responseMessage, message);
               
               resolve({
@@ -46,17 +60,17 @@ async function sendChatMessage(message, history = []) {
                 products: []
               });
             } else {
-              throw new Error(`Chat API error: ${res.statusCode}`);
+              throw new Error(`OpenAI API error: ${res.statusCode}`);
             }
           } catch (error) {
-            console.error('Chat API error:', error);
+            console.error('OpenAI API error:', error);
             resolve(getFallbackResponse(message));
           }
         });
       });
 
       req.on('error', (error) => {
-        console.error('Chat API error:', error);
+        console.error('OpenAI API error:', error);
         resolve(getFallbackResponse(message));
       });
 
@@ -64,7 +78,7 @@ async function sendChatMessage(message, history = []) {
       req.end();
     });
   } catch (error) {
-    console.error('Chat API error:', error);
+    console.error('OpenAI API error:', error);
     return getFallbackResponse(message);
   }
 }

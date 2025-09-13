@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { SearchResult } from '@/lib/elastic'
 import ProductCard from './ProductCard'
 import { getApiUrl } from '@/lib/config'
+import { ConversationInterface } from './ConversationInterface'
 
 interface SearchResultsProps {
   results: SearchResult[]
@@ -105,7 +106,13 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
   const handleFollowUpQuery = async (query: string) => {
     setIsChatLoading(true)
     try {
-              const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
+      // Update the main search with the follow-up query
+      if (onSearch) {
+        onSearch(query)
+      }
+      
+      // Also get the chat response for this query
+      const response = await fetch(`${getApiUrl('/api/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
       const data = await response.json()
       setCurrentChatResponse(data.chatResponse)
     } catch (error) {
@@ -116,8 +123,12 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
   }
 
   const handleSuggestionClick = (suggestion: string) => {
+    console.log('Suggestion clicked:', suggestion)
     if (onSearch) {
+      console.log('Calling onSearch with:', suggestion)
       onSearch(suggestion)
+    } else {
+      console.log('onSearch is not available')
     }
   }
 
@@ -154,12 +165,6 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
                 </div>
                 <h3 className="text-lg font-semibold text-white">AI Assistant Response</h3>
               </div>
-              <button 
-                onClick={() => window.open('/chat', '_blank')}
-                className="text-sm text-white hover:text-blue-200 underline transition-colors"
-              >
-                Open Full Chat
-              </button>
             </div>
           </div>
           <div className="p-6">
@@ -192,37 +197,64 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
                 </div>
               )}
 
+              {/* Context-specific suggestions for media server searches */}
+              {currentChatResponse.message && currentChatResponse.message.toLowerCase().includes('media server') && (
+                <div className="mt-6">
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Perfect for media servers:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => handleSuggestionClick("Dell OptiPlex desktop with high storage")}
+                      className="px-4 py-2 bg-gray-50 text-dell-blue text-sm rounded-lg border border-gray-200 hover:bg-dell-blue hover:text-white hover:border-dell-blue transition-all duration-200 cursor-pointer font-medium"
+                    >
+                      High Storage Desktops
+                    </button>
+                    <button
+                      onClick={() => handleSuggestionClick("Dell Precision workstation for Plex server")}
+                      className="px-4 py-2 bg-gray-50 text-dell-blue text-sm rounded-lg border border-gray-200 hover:bg-dell-blue hover:text-white hover:border-dell-blue transition-all duration-200 cursor-pointer font-medium"
+                    >
+                      Plex Server Setup
+                    </button>
+                    <button
+                      onClick={() => handleSuggestionClick("Dell PowerEdge server for home NAS")}
+                      className="px-4 py-2 bg-gray-50 text-dell-blue text-sm rounded-lg border border-gray-200 hover:bg-dell-blue hover:text-white hover:border-dell-blue transition-all duration-200 cursor-pointer font-medium"
+                    >
+                      Home NAS Solutions
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Interactive Follow-up Questions */}
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <h4 className="text-sm font-medium text-gray-700 mb-3">Ask me more:</h4>
                 <div className="flex flex-wrap gap-2">
                   <button
-                    onClick={() => handleFollowUpQuery("What are the best features of this product?")}
+                    onClick={() => handleFollowUpQuery("Dell OptiPlex desktop computers")}
                     disabled={isChatLoading}
                     className="px-4 py-2 bg-dell-blue text-white text-sm rounded-lg hover:bg-dell-darkblue transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    Tell me more
+                    Dell OptiPlex
                   </button>
                   <button
-                    onClick={() => handleFollowUpQuery("What are the pricing options?")}
+                    onClick={() => handleFollowUpQuery("Dell Precision workstations")}
                     disabled={isChatLoading}
                     className="px-4 py-2 bg-dell-blue text-white text-sm rounded-lg hover:bg-dell-darkblue transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    Pricing info
+                    Dell Precision
                   </button>
                   <button
-                    onClick={() => handleFollowUpQuery("Compare with similar products")}
+                    onClick={() => handleFollowUpQuery("Dell PowerEdge servers")}
                     disabled={isChatLoading}
                     className="px-4 py-2 bg-dell-blue text-white text-sm rounded-lg hover:bg-dell-darkblue transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    Compare products
+                    Dell PowerEdge
                   </button>
                   <button
-                    onClick={() => handleFollowUpQuery("What are the technical specifications?")}
+                    onClick={() => handleFollowUpQuery("Dell XPS desktop computers")}
                     disabled={isChatLoading}
                     className="px-4 py-2 bg-dell-blue text-white text-sm rounded-lg hover:bg-dell-darkblue transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    Tech specs
+                    Dell XPS Desktop
                   </button>
                 </div>
               </div>
@@ -230,6 +262,25 @@ export default function SearchResults({ results, isSearching, chatResponse, onSe
           </div>
         </div>
       )}
+
+      {/* Enhanced Conversation Interface */}
+      <div className="mb-8">
+        <ConversationInterface
+          sessionId={`search-${Date.now()}`}
+          currentSearch={currentChatResponse?.message}
+          searchResults={results}
+          onSuggestionClick={(suggestion) => {
+            if (onSearch) {
+              onSearch(suggestion)
+            }
+          }}
+          onFollowUpClick={(question) => {
+            if (onSearch) {
+              onSearch(question)
+            }
+          }}
+        />
+      </div>
 
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-900">

@@ -1,3 +1,5 @@
+import OpenAI from 'openai'
+
 interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
@@ -10,39 +12,47 @@ interface ChatResponse {
   products?: any[]
 }
 
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
 export async function sendChatMessage(message: string, history: ChatMessage[] = []): Promise<ChatResponse> {
   try {
-    const response = await fetch(`${process.env.ELASTIC_1CHAT_URL}/api/chat/converse`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `ApiKey ${process.env.ELASTIC_1CHAT_API_KEY}`,
-        'kbn-xsrf': 'true'
-      },
-      body: JSON.stringify({
-        input: message
-      })
+    // Convert history to OpenAI format
+    const openaiHistory = history.map(msg => ({
+      role: msg.role as 'user' | 'assistant',
+      content: msg.content
+    }))
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "You are a helpful Dell product assistant. Help users find the right Dell products including laptops, desktops, monitors, and accessories. Provide helpful recommendations and answer questions about Dell products. Keep responses concise and helpful."
+        },
+        ...openaiHistory,
+        {
+          role: "user",
+          content: message
+        }
+      ],
+      max_tokens: 500,
+      temperature: 0.7,
     })
 
-    if (response.ok) {
-      const data = await response.json()
-      
-      // Extract the response message from the 1Chat API structure
-      const responseMessage = data.response?.message || data.message || 'I found some information for you.'
-      
-      // Generate suggestions based on the response content
-      const suggestions = generateSuggestionsFromResponse(responseMessage, message)
-      
-      return {
-        message: responseMessage,
-        suggestions,
-        products: []
-      }
-    } else {
-      throw new Error(`Chat API error: ${response.status}`)
+    const responseMessage = completion.choices[0]?.message?.content || 'I found some information for you.'
+    
+    // Generate suggestions based on the response content
+    const suggestions = generateSuggestionsFromResponse(responseMessage, message)
+    
+    return {
+      message: responseMessage,
+      suggestions,
+      products: []
     }
   } catch (error) {
-    console.error('Chat API error:', error)
+    console.error('OpenAI API error:', error)
     
     // Enhanced fallback response based on the query
     const lowerMessage = message.toLowerCase()
@@ -109,22 +119,3 @@ function generateSuggestionsFromResponse(responseMessage: string, originalQuery:
   return suggestions.slice(0, 4) // Limit to 4 suggestions
 }
 
-export async function getChatTools(): Promise<any[]> {
-  try {
-    const response = await fetch(`${process.env.ELASTIC_1CHAT_URL}/api/chat/tools`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `ApiKey ${process.env.ELASTIC_1CHAT_API_KEY}`,
-        'kbn-xsrf': 'true'
-      }
-    })
-
-    if (response.ok) {
-      return await response.json()
-    }
-  } catch (error) {
-    console.error('Chat tools error:', error)
-  }
-  
-  return []
-}

@@ -5,6 +5,7 @@ import { Search, MessageCircle, ShoppingCart, Menu, X, Sparkles } from 'lucide-r
 import SearchResults from '@/components/SearchResults'
 import ChatInterface from '@/components/ChatInterface'
 import ProductCard from '@/components/ProductCard'
+import { SmartRecommendations } from '@/components/SmartRecommendations'
 import { getApiUrl } from '@/lib/config'
 
 interface SearchResult {
@@ -15,6 +16,8 @@ interface SearchResult {
   category?: string
   image?: string
   url?: string
+  rating?: number
+  reviews?: number
   _score: number
 }
 
@@ -27,15 +30,19 @@ export default function Home() {
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const [suggestions, setSuggestions] = useState<string[]>([])
   const [chatResponse, setChatResponse] = useState<any>(null)
+  const [sessionId] = useState(() => `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`)
 
   const handleSearch = async (query: string) => {
+    console.log('handleSearch called with:', query)
     if (!query.trim()) return
     
     setIsSearching(true)
     setChatResponse(null)
     try {
-      const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
+      console.log('Making API request for:', query)
+      const response = await fetch(`${getApiUrl('/api/search')}?q=${encodeURIComponent(query)}&includeChat=true`)
       const data = await response.json()
+      console.log('API response:', data)
       setSearchResults(data.results || [])
       setChatResponse(data.chatResponse)
     } catch (error) {
@@ -50,7 +57,7 @@ export default function Home() {
     
     if (value.length > 2) {
       try {
-        const response = await fetch(`${getApiUrl('/search')}?q=${encodeURIComponent(value)}&type=suggestions`)
+        const response = await fetch(`${getApiUrl('/api/search')}?q=${encodeURIComponent(value)}&type=suggestions`)
         const data = await response.json()
         setSuggestions(data.suggestions || [])
       } catch (error) {
@@ -151,7 +158,7 @@ export default function Home() {
             <h1 className="text-4xl md:text-6xl font-bold">Next-Gen Dell Experience</h1>
           </div>
           <p className="text-xl md:text-2xl mb-8 text-blue-100">
-            Powered by Elastic Search & AI Chat
+            Powered by Elastic Search & OpenAI
           </p>
           <div className="max-w-2xl mx-auto">
             <div className="relative">
@@ -180,12 +187,33 @@ export default function Home() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {searchResults.length > 0 ? (
-          <SearchResults 
-            results={searchResults} 
-            isSearching={isSearching} 
-            chatResponse={chatResponse}
-            onSearch={handleSearch}
-          />
+          <>
+            <SearchResults 
+              results={searchResults} 
+              isSearching={isSearching} 
+              chatResponse={chatResponse}
+              onSearch={handleSearch}
+            />
+            <SmartRecommendations
+              searchQuery={headerSearchQuery || heroSearchQuery}
+              searchResults={searchResults}
+              sessionId={sessionId}
+              onProductClick={(product) => {
+                console.log('Product clicked:', product)
+                // Track product click for recommendations
+                fetch('/api/recommendations', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    action: 'track',
+                    sessionId,
+                    productId: product.id,
+                    actionType: 'click'
+                  })
+                }).catch(console.error)
+              }}
+            />
+          </>
         ) : (
           <div className="text-center py-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">Discover Dell Products</h2>

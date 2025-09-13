@@ -33,11 +33,7 @@ export ELASTICSEARCH_URL="https://your-elasticsearch-url"
 export ELASTICSEARCH_API_KEY="your_elasticsearch_api_key"
 export ELASTICSEARCH_INDEX="search-dell"
 
-# Elastic 1Chat Configuration
-export ELASTIC_1CHAT_URL="https://your-1chat-url"
-export ELASTIC_1CHAT_API_KEY="your_1chat_api_key"
-
-# OpenAI (Optional - for fallback responses)
+# OpenAI Configuration
 export OPENAI_API_KEY="your_openai_api_key"
 ```
 

@@ -1,3 +1,5 @@
+import { getCachedProductImage } from './imageService'
+
 export interface SearchResult {
   id: string
   title: string
@@ -6,6 +8,8 @@ export interface SearchResult {
   category?: string
   image?: string
   url?: string
+  rating?: number
+  reviews?: number
   _score: number
 }
 
@@ -51,12 +55,12 @@ export async function searchProducts(query: string, size: number = 10): Promise<
         }
       },
       size: size,
-      _source: ['title', 'description', 'price', 'category', 'image', 'url']
+      _source: ['title', 'description', 'price', 'category', 'image', 'url', 'rating', 'reviews']
     }
 
     const response = await elasticRequest('_search', body)
 
-    return response.hits.hits.map((hit: any) => ({
+    const results = response.hits.hits.map((hit: any) => ({
       id: hit._id,
       title: hit._source.title || 'Untitled',
       description: hit._source.description || '',
@@ -64,8 +68,31 @@ export async function searchProducts(query: string, size: number = 10): Promise<
       category: hit._source.category,
       image: hit._source.image,
       url: hit._source.url,
+      rating: hit._source.rating,
+      reviews: hit._source.reviews,
       _score: hit._score
     }))
+
+    // Enhance results with real images
+    const enhancedResults = await Promise.all(
+      results.map(async (result: SearchResult) => {
+        if (!result.image) {
+          try {
+            const imageResult = await getCachedProductImage(result.title, result.category)
+            return {
+              ...result,
+              image: imageResult.url
+            }
+          } catch (error) {
+            console.error('Error enhancing image for product:', result.title, error)
+            return result
+          }
+        }
+        return result
+      })
+    )
+
+    return enhancedResults
   } catch (error) {
     console.error('Elasticsearch error:', error)
     return []

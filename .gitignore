@@ -85,3 +85,10 @@ jspm_packages/
 
 # DynamoDB Local files
 .dynamodb/
+
+# AWS CDK
+aws-deployment/cdk.out/
+aws-deployment/lambda/*/lambda.zip
+aws-deployment/lambda/*/chat-lambda.zip
+aws-deployment/lambda/*/search-lambda.zip
+aws-deployment/lambda/*/chat-lambda-updated.zip

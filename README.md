@@ -1,11 +1,11 @@
 # Dell Search Demo - Next-Gen E-commerce Experience
 
-A modern, AI-powered e-commerce demo showcasing Dell's next-generation website experience using Elastic Serverless and Elastic 1Chat.
+A modern, AI-powered e-commerce demo showcasing Dell's next-generation website experience using Elastic Serverless and OpenAI.
 
 ## 🚀 Features
 
 - **AI-Powered Search**: Intelligent product search powered by Elastic Serverless
-- **Smart Chat Assistant**: Interactive AI assistant using Elastic 1Chat for personalized recommendations
+- **Smart Chat Assistant**: Interactive AI assistant using OpenAI for personalized recommendations
 - **Modern UI/UX**: Beautiful, responsive design inspired by Dell's branding
 - **Real-time Results**: Instant search results with live product information
 - **Interactive Suggestions**: Clickable search suggestions and follow-up questions
@@ -15,7 +15,7 @@ A modern, AI-powered e-commerce demo showcasing Dell's next-generation website e
 
 - **Frontend**: Next.js 14 with App Router, TypeScript, Tailwind CSS
 - **Search**: Elastic Serverless (search-dell index)
-- **AI Chat**: Elastic 1Chat for conversational AI
+- **AI Chat**: OpenAI for conversational AI
 - **Styling**: Custom Dell branding with responsive design
 - **API**: RESTful API routes for search and chat functionality
 
@@ -24,7 +24,7 @@ A modern, AI-powered e-commerce demo showcasing Dell's next-generation website e
 - Node.js 18+ 
 - npm or yarn
 - Elastic Serverless access
-- Elastic 1Chat access
+- OpenAI API access
 
 ## 🔧 Installation
 
@@ -40,20 +40,30 @@ A modern, AI-powered e-commerce demo showcasing Dell's next-generation website e
    ```
 
 3. **Set up environment variables**
+   
+   **Quick Setup (Recommended):**
+   ```bash
+   npm run setup:env
+   ```
+   
+   **Manual Setup:**
    Create a `.env.local` file in the root directory:
    ```env
-   # OpenAI API Key (for fallback responses)
+   # OpenAI API Key (for AI chat functionality)
    OPENAI_API_KEY=your_openai_api_key_here
    
    # Elasticsearch Configuration
    ELASTICSEARCH_URL=https://your-elasticsearch-url
    ELASTICSEARCH_API_KEY=your_elasticsearch_api_key
    ELASTICSEARCH_INDEX=search-dell
-   
-   # Elastic 1Chat Configuration
-   ELASTIC_1CHAT_URL=https://your-1chat-url
-   ELASTIC_1CHAT_API_KEY=your_1chat_api_key
    ```
+   
+   **Validate your setup:**
+   ```bash
+   npm run validate:connections
+   ```
+   
+   📖 For detailed setup instructions, see [ENVIRONMENT-SETUP.md](./ENVIRONMENT-SETUP.md)
 
 4. **Run the development server**
    ```bash
@@ -62,6 +72,15 @@ A modern, AI-powered e-commerce demo showcasing Dell's next-generation website e
 
 5. **Open your browser**
    Navigate to [http://localhost:3000](http://localhost:3000)
+
+## 🛠️ Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run setup:env` - Interactive environment setup
+- `npm run validate:connections` - Test Elasticsearch and OpenAI connections
+- `npm run deploy:aws` - Deploy to AWS
 
 ## 🎯 Usage
 

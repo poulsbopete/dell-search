@@ -1,22 +1,54 @@
 'use client'
 
 import { SearchResult } from '@/lib/elastic'
-import { ShoppingCart, Heart, ExternalLink } from 'lucide-react'
+import { ShoppingCart, Heart, ExternalLink, Star } from 'lucide-react'
+import { useState } from 'react'
 
 interface ProductCardProps {
   product: SearchResult
+  onClick?: () => void
+  showRecommendationBadge?: boolean
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, onClick, showRecommendationBadge = false }: ProductCardProps) {
+  const [imageLoading, setImageLoading] = useState(true)
+  const [imageError, setImageError] = useState(false)
+
+  const handleImageLoad = () => {
+    setImageLoading(false)
+  }
+
+  const handleImageError = () => {
+    setImageLoading(false)
+    setImageError(true)
+  }
+
   return (
-    <div className="product-card">
-      <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-        {product.image ? (
-          <img
-            src={product.image}
-            alt={product.title}
-            className="w-full h-48 object-cover"
-          />
+    <div className="product-card relative" onClick={onClick}>
+      {showRecommendationBadge && (
+        <div className="absolute top-2 right-2 z-10">
+          <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center">
+            <Star className="h-3 w-3 mr-1" />
+            AI Pick
+          </div>
+        </div>
+      )}
+      <div className="aspect-w-16 aspect-h-9 bg-gray-200 relative overflow-hidden">
+        {product.image && !imageError ? (
+          <>
+            {imageLoading && (
+              <div className="absolute inset-0 bg-gradient-to-br from-dell-lightblue to-dell-blue flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              </div>
+            )}
+            <img
+              src={product.image}
+              alt={product.title}
+              className={`w-full h-48 object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+              onLoad={handleImageLoad}
+              onError={handleImageError}
+            />
+          </>
         ) : (
           <div className="w-full h-48 bg-gradient-to-br from-dell-lightblue to-dell-blue flex items-center justify-center">
             <span className="text-white text-lg font-semibold">Dell</span>
@@ -45,8 +77,19 @@ export default function ProductCard({ product }: ProductCardProps) {
         </p>
         
         {product.price && (
-          <div className="text-xl font-bold text-dell-blue mb-3">
-            {product.price}
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-xl font-bold text-dell-blue">
+              {product.price}
+            </div>
+            {product.rating && (
+              <div className="flex items-center text-sm text-gray-600">
+                <Star className="h-4 w-4 text-yellow-400 fill-current mr-1" />
+                <span>{product.rating}</span>
+                {product.reviews && (
+                  <span className="ml-1 text-gray-500">({product.reviews})</span>
+                )}
+              </div>
+            )}
           </div>
         )}
         
@@ -68,3 +111,5 @@ export default function ProductCard({ product }: ProductCardProps) {
     </div>
   )
 }
+
+export default ProductCard

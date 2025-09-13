@@ -9,7 +9,9 @@
     "lint": "next lint",
     "export": "next build && next export",
     "deploy:aws": "./deploy.sh",
-    "deploy:build": "npm run build"
+    "deploy:build": "npm run build",
+    "setup:env": "node setup-env.js",
+    "validate:connections": "node validate-connection.js"
   },
   "dependencies": {
     "next": "14.0.0",
@@ -22,7 +24,9 @@
     "@types/node": "^20.8.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
-    "typescript": "^5.2.0"
+    "typescript": "^5.2.0",
+    "openai": "^4.20.1",
+    "dotenv": "^16.3.1"
   },
   "devDependencies": {
     "eslint": "^8.52.0",

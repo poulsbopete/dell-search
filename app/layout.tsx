@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Dell Next-Gen Search Demo',
-  description: 'Next-generation Dell.com experience powered by Elastic Search and 1Chat',
+  description: 'Next-generation Dell.com experience powered by Elastic Search and OpenAI',
 }
 
 export default function RootLayout({
